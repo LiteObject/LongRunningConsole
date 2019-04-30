@@ -1,12 +1,11 @@
-﻿namespace LongRunningConsole
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+
+namespace LongRunningConsole.Services
 {
-    using System;
-    using System.Threading;
-    using System.Threading.Tasks;
-
-    using Microsoft.Extensions.Hosting;
-    using Microsoft.Extensions.Logging;
-
     /// <summary>
     /// The my service.
     /// </summary>
@@ -30,7 +29,7 @@
         /// </param>
         public MyService(ILogger<MyService> logger)
         {
-            this.logger = logger;
+            this.logger = logger?? throw new ArgumentNullException(nameof(logger));
         }
 
         /// <summary>
@@ -44,7 +43,7 @@
         /// </returns>
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            Console.WriteLine($"{DateTime.Now} Timed Background Service is starting.");
+            Console.WriteLine($"[{DateTime.Now}] {nameof(MyService)} background Service is starting.");
             this.timer = new Timer(this.DoWork, null, TimeSpan.Zero, TimeSpan.FromSeconds(5));
             return Task.CompletedTask;
         }
@@ -60,7 +59,7 @@
         /// </returns>
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            Console.WriteLine($"{DateTime.Now} Timed Background Service is stopping.");
+            Console.WriteLine($"[{DateTime.Now}]  {nameof(MyService)} background Service is stopping.");
             this.timer?.Change(Timeout.Infinite, 0);
             return Task.CompletedTask;
         }
@@ -77,11 +76,11 @@
         /// The do work.
         /// </summary>
         /// <param name="state">
-        /// The state.
+        /// The state object is useful for providing the additional information required for the Timer operation.
         /// </param>
         private void DoWork(object state)
         {
-            Console.WriteLine($"{DateTime.Now} Timed Background Service is working.");
+            Console.WriteLine($"{DateTime.Now} {nameof(MyService)} background service is working...");
         }
     }
 }

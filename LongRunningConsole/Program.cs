@@ -1,4 +1,6 @@
-﻿namespace LongRunningConsole
+﻿using LongRunningConsole.Services;
+
+namespace LongRunningConsole
 {
     using System;
     using System.Diagnostics;
@@ -11,7 +13,7 @@
 
     /// <summary>
     /// The program.
-    /// Original Article: https://github.com/stevejgordon/GenericHostExample/blob/master/GenericHostExample/Program.cs
+    /// Original Article: https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services?view=aspnetcore-2.2
     /// </summary>
     public class Program
     {
@@ -46,6 +48,8 @@
                             services.AddOptions();
                             services.AddLogging();
                             services.AddHostedService<MyService>();
+                            // services.AddHostedService<FileUploadService>();
+                            /* Add other services here as needed */
                         })
                 .ConfigureLogging(
                     (hostContext, services) =>
