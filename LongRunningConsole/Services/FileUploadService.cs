@@ -1,10 +1,12 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using LongRunningConsole.Library;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using OfficeOpenXml;
 
 namespace LongRunningConsole.Services
@@ -31,19 +33,31 @@ namespace LongRunningConsole.Services
         /// The _timer.
         /// </summary>
         private Timer _timer;
-        
+
+        private readonly IOptions<AppConfig> _appConfig;
+
+        private readonly ServiceConfig serviceConfig;
+
         /// <inheritdoc />
-        public FileUploadService(ILogger<FileUploadService> logger)
+        public FileUploadService(ILogger<FileUploadService> logger, IOptions<AppConfig> appConfig)
         {
-            this._logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this._logger.LogTrace("FileUploadService object has been instantiated.");
+            this._logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            this._appConfig = appConfig ?? throw new ArgumentNullException(nameof(appConfig));
+            
+            serviceConfig = this._appConfig.Value.Services.OfType<ServiceConfig>().FirstOrDefault(s => s.ServiceName.Equals(nameof(FileUploadService)));
+
+            if (serviceConfig is null)
+            {
+                throw new ApplicationException($"{nameof(serviceConfig)} cannot be null.");
+            }
         }
 
         /// <inheritdoc />
         public Task StartAsync(CancellationToken cancellationToken)
         {
             Console.WriteLine($"[{DateTime.Now}] {nameof(FileUploadService)} background Service is starting.");
-            this._timer = new Timer(this.LoadFile, null, TimeSpan.Zero, TimeSpan.FromSeconds(60));
+            this._timer = new Timer(this.LoadFile, null, TimeSpan.Zero, TimeSpan.FromSeconds(serviceConfig.Frequency));
             return Task.CompletedTask;
         }
 

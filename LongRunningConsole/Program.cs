@@ -47,30 +47,21 @@ namespace LongRunningConsole
                         {
                             services.AddOptions();
                             services.AddLogging();
+                            services.Configure<AppConfig>(hostContext.Configuration.GetSection("AppConfig"));
                             services.AddHostedService<MyService>();
                             // services.AddHostedService<FileUploadService>();
                             /* Add other services here as needed */
                         })
                 .ConfigureLogging(
-                    (hostContext, services) =>
-                        {
-                            services.AddConsole();
+                    (hostContext, logging) =>
+                    {
+                        logging.AddConfiguration(hostContext.Configuration.GetSection("Logging"));
+                            logging.AddConsole();
                         })
                 .RunConsoleAsync();
             
             watch.Stop();
-            Print($"\n\nPress any key to exit. Elapsed: {watch.Elapsed}");
-        }
-
-        /// <summary>
-        /// The print.
-        /// </summary>
-        /// <param name="message">
-        /// The message.
-        /// </param>
-        private static void Print(string message)
-        {
-            Console.WriteLine(message);
+            Console.WriteLine($"\n\nPress any key to exit. Elapsed: {watch.Elapsed}");
         }
     }
 }
